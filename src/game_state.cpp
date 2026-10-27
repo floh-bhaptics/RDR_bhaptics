@@ -22,7 +22,8 @@ constexpr const char* kRecoilShotgunTwoHanded[2] = {"RecoilShotgun_TwoHanded_R",
 constexpr const char* kBow[2] = {"BowRelease_R", "BowRelease_L"};
 constexpr const char* kThrow[2] = {"Throw_R", "Throw_L"};
 constexpr const char* kReload[2] = {"Reload_R", "Reload_L"};
-constexpr const char* kTurret = "RecoilTurret";  // Gatling, Browning, cannon: both arms
+constexpr const char* kTurret = "RecoilTurret";  // Gatling, Browning: both arms, one shot per play
+constexpr const char* kCannon = "RecoilCannon";  // the cannon: one heavy shot
 constexpr const char* kImpact = "Impact";        // directional (angleX)
 constexpr const char* kImpactNoDir = "ImpactNoDir";
 constexpr const char* kDeath = "Death";
@@ -212,7 +213,11 @@ void weapon(uint64_t now) {
     // Mounted guns: their rounds may not count down like a clip, so IS_ACTOR_SHOOTING drives a steady rattle.
     // TODO(verify): whether GET_WEAPON_IN_HAND reports the turret while on it; RDRVR has its own mounted-gun probe.
     if (cls == WeaponClass::Turret && shooting) {
-        if (g_turret.due(now, w == WEAPON_DEFAULT_Cannon ? 1500 : 110)) haptics::play(ev::kTurret, g_cfg.recoil);
+        if (w == WEAPON_DEFAULT_Cannon) {
+            if (g_turret.due(now, 1500)) haptics::play(ev::kCannon, g_cfg.recoil);
+        } else {
+            if (g_turret.due(now, 110)) haptics::play(ev::kTurret, g_cfg.recoil);
+        }
     }
 
     g_weapon = w;
