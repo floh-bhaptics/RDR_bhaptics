@@ -127,6 +127,7 @@ if /i not "$(DeployToGame)"=="true" echo deploy_game: skipped (DeployToGame=$(De
     <None Include="tools\postbuild_zip.ps1" />
     <None Include="tools\deploy_game.ps1" />
     <None Include="README.md" />
+    <None Include="README_build.md" />
   </ItemGroup>
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

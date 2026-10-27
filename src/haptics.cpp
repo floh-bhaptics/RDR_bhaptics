@@ -103,7 +103,7 @@ void worker() {
 bool start(const std::wstring& dll_path, const std::string& app_id, const std::string& api_key) {
     if (g_ready) return true;
     if (app_id.empty() || api_key.empty()) {
-        log::error("no AppId / ApiKey in RDR_bhaptics.ini [bHaptics]");
+        log::error("no AppId / ApiKey (built in, or in RDR_bhaptics.ini [bHaptics])");
         return false;
     }
     // LOAD_WITH_ALTERED_SEARCH_PATH: the DLL's own dependencies are looked up next to it, not in the game folder
@@ -134,6 +134,8 @@ bool start(const std::wstring& dll_path, const std::string& app_id, const std::s
     if (!g_api.shutdown) log::info("bhaptics_library.dll has no bHapticsShutdown (older SDK): fine while the game exits with it");
 
     // returns at once; connects (and reconnects when the player starts later) in the background
+    // (sdkAPIKey, workspaceId, initJsonMessage). The third is a JSON string of default patterns, or "" for none:
+    // always "" here, never the mod's name or anything else (a non-empty string that is not that JSON breaks the init).
     if (!g_api.registry_and_init(api_key.c_str(), app_id.c_str(), "")) {
         log::error("registryAndInit could not start");
         return false;

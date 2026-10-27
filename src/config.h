@@ -11,8 +11,10 @@ struct Config {
     bool debug_log = false;
 
     // [bHaptics]
-    std::string app_id;   // workspace id from the bHaptics developer portal
-    std::string api_key;  // its SDK API key
+    // The mod's workspace in the bHaptics developer portal. Built in; [bHaptics] AppId / ApiKey in the ini override
+    // them only when set (for testing another workspace).
+    std::string app_id = "6ae0a3f009cd02d96fb42fae";
+    std::string api_key = "4WvQBCQIyg8V23Z62vSV";
 
     // [Hands]
     // Which arm a shot / reload plays on. Auto: RDRVR's [Controls] LeftHanded (its RDRVR.ini in the game folder, then

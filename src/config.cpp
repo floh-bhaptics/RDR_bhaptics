@@ -73,8 +73,11 @@ Config load_config(const std::wstring& dir, const std::wstring& game_dir) {
     c.enabled = read_bool(ini, L"General", L"Enabled", c.enabled);
     c.debug_log = read_bool(ini, L"General", L"DebugLog", c.debug_log);
 
-    c.app_id = narrow(read_str(ini, L"bHaptics", L"AppId", L""));
-    c.api_key = narrow(read_str(ini, L"bHaptics", L"ApiKey", L""));
+    // the built-in workspace unless the ini sets another (an empty key keeps the built-in one)
+    const std::string app_id = narrow(read_str(ini, L"bHaptics", L"AppId", L""));
+    const std::string api_key = narrow(read_str(ini, L"bHaptics", L"ApiKey", L""));
+    if (!app_id.empty()) c.app_id = app_id;
+    if (!api_key.empty()) c.api_key = api_key;
 
     c.recoil = read_float(ini, L"Intensity", L"Recoil", c.recoil);
     c.impact = read_float(ini, L"Intensity", L"Impact", c.impact);
