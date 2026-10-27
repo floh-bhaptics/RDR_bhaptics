@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{691D197C-F091-4DBA-911A-3C1BB8CE8C33}</ProjectGuid>
+    <RootNamespace>RDR_bhaptics</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+
+  <!-- Where the SDKs are. RedHookSDK: a checkout of https://github.com/K3rhos/RedHookSDK (Headers\, Resources\).
+       libs\bhaptics\: bhaptics_library.dll (shipped in the zip) and bhaptics.h (compile time only; included as
+       <bhaptics/bhaptics.h>, so libs\ is the include path). -->
+  <PropertyGroup Label="UserMacros">
+    <RedHookSdkDir Condition="'$(RedHookSdkDir)' == ''">$(ProjectDir)extern\RedHookSDK\</RedHookSdkDir>
+    <LibsDir Condition="'$(LibsDir)' == ''">$(ProjectDir)libs\</LibsDir>
+    <BhapticsLibDir Condition="'$(BhapticsLibDir)' == ''">$(LibsDir)bhaptics\</BhapticsLibDir>
+
+    <!-- Copy the built mod into the game folder after each build, for testing.
+         On only when DeployToGame is true AND RdrGameDir exists, so a build on another machine just skips it.
+         Override either per machine (environment variable, or msbuild /p:DeployToGame=false). -->
+    <RdrGameDir Condition="'$(RdrGameDir)' == ''">G:\SteamLibrary\steamapps\common\Red Dead Redemption\</RdrGameDir>
+    <DeployToGame Condition="'$(DeployToGame)' == ''">true</DeployToGame>
+    <DeployToGame Condition="!Exists('$(RdrGameDir)RDR.exe')">false</DeployToGame>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+
+  <PropertyGroup>
+    <TargetName>RDR_bhaptics</TargetName>
+    <TargetExt>.red</TargetExt>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\</IntDir>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <WarningLevel>Level4</WarningLevel>
+      <ConformanceMode>true</ConformanceMode>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <!-- From the RedHook SDK's headers, not our code: 4505 Natives.h's thousands of unused static functions;
+           4828 their "(c) Copyright" comment line is Latin-1, not UTF-8; 4127 NativesCaller.h's sizeof check -->
+      <DisableSpecificWarnings>4505;4100;4244;4828;4127;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <!-- BHAPTICS_DECLSPEC empty: bhaptics.h is only used for the function types; the DLL is loaded at runtime -->
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;BHAPTICS_DECLSPEC=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(RedHookSdkDir);$(RedHookSdkDir)Resources\Includes;$(LibsDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(RedHookSdkDir)Resources\Libraries\RedHook.lib;shell32.lib;ole32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>powershell -NoProfile -ExecutionPolicy Bypass -File "$(ProjectDir)tools\postbuild_zip.ps1" -Red "$(TargetPath)" -ProjectDir "$(ProjectDir)." -OutDir "$(OutDir)." -LibDir "$(BhapticsLibDir)."
+if errorlevel 1 exit /b 1
+if /i "$(DeployToGame)"=="true" powershell -NoProfile -ExecutionPolicy Bypass -File "$(ProjectDir)tools\deploy_game.ps1" -Red "$(TargetPath)" -ProjectDir "$(ProjectDir)." -LibDir "$(BhapticsLibDir)." -GameDir "$(RdrGameDir)."
+if /i not "$(DeployToGame)"=="true" echo deploy_game: skipped (DeployToGame=$(DeployToGame), RdrGameDir=$(RdrGameDir))</Command>
+      <Message>Packing RDR_bhaptics.zip and copying to the game folder</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\game_state.cpp" />
+    <ClCompile Include="src\haptics.cpp" />
+    <ClCompile Include="src\config.cpp" />
+    <ClCompile Include="src\log.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\rh.h" />
+    <ClInclude Include="src\game_state.h" />
+    <ClInclude Include="src\haptics.h" />
+    <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\log.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="config\RDR_bhaptics.ini" />
+    <None Include="tools\postbuild_zip.ps1" />
+    <None Include="tools\deploy_game.ps1" />
+    <None Include="README.md" />
+  </ItemGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
