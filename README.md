@@ -6,7 +6,7 @@ but it also works in the normal flat game.
 ## Installation
 
 1. Install [RedHook](https://www.nexusmods.com/reddeadredemption/mods/192) into your game folder (RDRVR needs it too).
-2. Download **RDR_bhaptics.zip** from the [latest release](https://github.com/floh-bhaptics/RDR_bhaptics/releases/latest).
+2. Download the latest release: [RDR_bhaptics.zip](https://github.com/floh-bhaptics/RDR_bhaptics/releases/latest/download/RDR_bhaptics.zip)
 3. Unzip it into your game folder, the one with `RDR.exe` (e.g. `...\steamapps\common\Red Dead Redemption\`).
    You should then have `RDR_bhaptics.red` and a folder `RDR_bhaptics` next to `RDR.exe`.
 4. Start the bHaptics Player, then the game.
