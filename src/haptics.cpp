@@ -162,12 +162,22 @@ void stop_and_unload() {
 
 bool connected() { return g_ready && g_api.ws_is_connected(); }
 
-void play(const char* event, float intensity, float duration, float angle_x, float offset_y) {
-    if (intensity <= 0.0f) return;
-    push({Op::Play, event, intensity, duration, angle_x, offset_y});
+// The portal and the SDK only know lowercase event ids; the code keeps readable CamelCase names ("RecoilPistol_R"),
+// lowercased here on their way to the SDK ("recoilpistol_r").
+std::string event_id(const char* name) {
+    std::string id(name ? name : "");
+    for (char& c : id) {
+        if (c >= 'A' && c <= 'Z') c = static_cast<char>(c - 'A' + 'a');
+    }
+    return id;
 }
 
-void stop(const char* event) { push({Op::Stop, event, 0, 0, 0, 0}); }
+void play(const char* event, float intensity, float duration, float angle_x, float offset_y) {
+    if (intensity <= 0.0f) return;
+    push({Op::Play, event_id(event), intensity, duration, angle_x, offset_y});
+}
+
+void stop(const char* event) { push({Op::Stop, event_id(event), 0, 0, 0, 0}); }
 
 void stop_all() { push({Op::StopAll, {}, 0, 0, 0, 0}); }
 

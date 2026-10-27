@@ -32,6 +32,9 @@ state through the game's natives, so it works in flat mode too.
 | `HorseTrot`, `HorseGallop` | riding, in step with the horse's speed |
 | `OnFire`, `WaterEnter` | burning, wading in |
 
+The names are CamelCase for readability; the plugin lowercases them before calling the SDK, so create them in
+the portal in lowercase (`RecoilPistol_R` → `recoilpistol_r`).
+
 `_R` / `_L` is the gun arm: `[Hands] Hand=Auto` follows RDRVR's left-handed setting.
 
 Nothing plays during pause menus and cutscenes.
