@@ -42,8 +42,9 @@ void script_main() {
     rdrbh::log::open(plugin_dir + L"\\RDR_bhaptics.log");
     const rdrbh::Config cfg = rdrbh::load_config(plugin_dir, game_dir);
     rdrbh::log::set_debug(cfg.debug_log);
-    rdrbh::log::info("RDR_bhaptics starting (RedHook %d.%d), %s-handed (%s)", RH_GetMajorVersion(), RH_GetMinorVersion(),
-                     cfg.left_handed ? "left" : "right", cfg.hand_source.c_str());
+    rdrbh::log::info("RDR_bhaptics starting (RedHook %d.%d), %s-handed (%s), long guns %s (%s)", RH_GetMajorVersion(),
+                     RH_GetMinorVersion(), cfg.left_handed ? "left" : "right", cfg.hand_source.c_str(),
+                     cfg.two_handed ? "two-handed" : "one-handed", cfg.two_handed_source.c_str());
 
     if (!cfg.enabled) {
         rdrbh::log::info("disabled in the ini");

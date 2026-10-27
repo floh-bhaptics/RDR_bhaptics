@@ -20,6 +20,7 @@ state through the game's natives, so it works in flat mode too.
 | Event (workspace name) | When |
 |---|---|
 | `RecoilPistol_R/_L`, `RecoilRifle_R/_L`, `RecoilShotgun_R/_L` | a round leaves the clip (pistols and revolvers / repeaters, rifles, sniper rifles / shotguns) |
+| `RecoilRifle_TwoHanded_R/_L`, `RecoilShotgun_TwoHanded_R/_L` | the same, long guns with RDRVR's two-handed hold on (`[Hands] TwoHanded`) |
 | `BowRelease_R/_L`, `Throw_R/_L` | an arrow, a thrown weapon |
 | `RecoilTurret` | firing a Gatling, Browning or cannon |
 | `Reload_R/_L` | the game's reload starts |

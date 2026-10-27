@@ -16,6 +16,9 @@ namespace ev {
 constexpr const char* kRecoilPistol[2] = {"RecoilPistol_R", "RecoilPistol_L"};    // pistols, revolvers
 constexpr const char* kRecoilRifle[2] = {"RecoilRifle_R", "RecoilRifle_L"};       // repeaters, rifles, sniper rifles
 constexpr const char* kRecoilShotgun[2] = {"RecoilShotgun_R", "RecoilShotgun_L"};
+// long guns held with both hands (RDRVR's foregrip hold; [Hands] TwoHanded): _R / _L is still the gun (trigger) hand
+constexpr const char* kRecoilRifleTwoHanded[2] = {"RecoilRifle_TwoHanded_R", "RecoilRifle_TwoHanded_L"};
+constexpr const char* kRecoilShotgunTwoHanded[2] = {"RecoilShotgun_TwoHanded_R", "RecoilShotgun_TwoHanded_L"};
 constexpr const char* kBow[2] = {"BowRelease_R", "BowRelease_L"};
 constexpr const char* kThrow[2] = {"Throw_R", "Throw_L"};
 constexpr const char* kReload[2] = {"Reload_R", "Reload_L"};
@@ -191,8 +194,12 @@ void weapon(uint64_t now) {
             const float k = clampf(0.8f + 0.2f * (fired - 1.0f), 0.8f, 1.0f) * g_cfg.recoil;  // both barrels: stronger
             switch (cls) {
                 case WeaponClass::Pistol: haptics::play(ev::kRecoilPistol[a], k); break;
-                case WeaponClass::Rifle: haptics::play(ev::kRecoilRifle[a], k); break;
-                case WeaponClass::Shotgun: haptics::play(ev::kRecoilShotgun[a], k); break;
+                case WeaponClass::Rifle:
+                    haptics::play(g_cfg.two_handed ? ev::kRecoilRifleTwoHanded[a] : ev::kRecoilRifle[a], k);
+                    break;
+                case WeaponClass::Shotgun:  // the Sawed-off too: RDRVR gives it the Double-barrel's foregrip
+                    haptics::play(g_cfg.two_handed ? ev::kRecoilShotgunTwoHanded[a] : ev::kRecoilShotgun[a], k);
+                    break;
                 case WeaponClass::Bow: haptics::play(ev::kBow[a], k); break;
                 default: break;
             }

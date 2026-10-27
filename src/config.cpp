@@ -39,12 +39,29 @@ bool read_bool(const std::wstring& file, const wchar_t* section, const wchar_t* 
     return s == L"1" || _wcsicmp(s.c_str(), L"true") == 0 || _wcsicmp(s.c_str(), L"on") == 0;
 }
 
-// RDRVR's [Controls] LeftHanded: -1 when the key is absent from that file
-int rdrvr_left_handed(const std::wstring& file) {
+// An RDRVR 0/1 setting from one of its ini files: -1 when the file or the key is absent
+int rdrvr_flag(const std::wstring& file, const wchar_t* section, const wchar_t* key) {
     if (GetFileAttributesW(file.c_str()) == INVALID_FILE_ATTRIBUTES) return -1;
-    std::wstring s = read_str(file, L"Controls", L"LeftHanded", L"");
+    std::wstring s = read_str(file, section, key, L"");
     if (s.empty()) return -1;
     return s == L"1" ? 1 : 0;
+}
+
+// RDRVR's setting: its menu's choice (%LOCALAPPDATA%\RDRVR\RDRVR.user.ini) first, then its RDRVR.ini in the game
+// folder. -1 when neither has it (no RDRVR).
+int rdrvr_setting(const std::wstring& game_dir, const wchar_t* section, const wchar_t* key, std::string* source) {
+    int v = -1;
+    wchar_t* local = nullptr;
+    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &local))) {
+        v = rdrvr_flag(std::wstring(local) + L"\\RDRVR\\RDRVR.user.ini", section, key);
+        if (v >= 0) *source = "RDRVR.user.ini";
+        CoTaskMemFree(local);
+    }
+    if (v < 0) {
+        v = rdrvr_flag(game_dir + L"\\RDRVR.ini", section, key);
+        if (v >= 0) *source = "RDRVR.ini";
+    }
+    return v;
 }
 
 }  // namespace
@@ -85,18 +102,19 @@ Config load_config(const std::wstring& dir, const std::wstring& game_dir) {
         c.left_handed = false;
         c.hand_source = "ini";
     } else {
-        wchar_t* local = nullptr;
-        int lh = -1;
-        if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &local))) {
-            lh = rdrvr_left_handed(std::wstring(local) + L"\\RDRVR\\RDRVR.user.ini");
-            if (lh >= 0) c.hand_source = "RDRVR.user.ini";
-            CoTaskMemFree(local);
-        }
-        if (lh < 0) {
-            lh = rdrvr_left_handed(game_dir + L"\\RDRVR.ini");
-            if (lh >= 0) c.hand_source = "RDRVR.ini";
-        }
-        c.left_handed = lh == 1;
+        c.left_handed = rdrvr_setting(game_dir, L"Controls", L"LeftHanded", &c.hand_source) == 1;
+    }
+
+    // two-handed long guns: our ini wins, then RDRVR's [Reload] TwoHanded; off without RDRVR (flat play)
+    std::wstring two = read_str(ini, L"Hands", L"TwoHanded", L"Auto");
+    if (_wcsicmp(two.c_str(), L"On") == 0 || two == L"1") {
+        c.two_handed = true;
+        c.two_handed_source = "ini";
+    } else if (_wcsicmp(two.c_str(), L"Off") == 0 || two == L"0") {
+        c.two_handed = false;
+        c.two_handed_source = "ini";
+    } else {
+        c.two_handed = rdrvr_setting(game_dir, L"Reload", L"TwoHanded", &c.two_handed_source) == 1;
     }
     return c;
 }

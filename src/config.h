@@ -20,6 +20,12 @@ struct Config {
     bool left_handed = false;
     std::string hand_source = "default";  // for the log: "ini", "RDRVR.ini", "RDRVR.user.ini", "default"
 
+    // Long guns (rifles, shotguns) play their "_TwoHanded_" recoil. Auto: RDRVR's [Reload] TwoHanded (its foregrip
+    // hold) is on. Note this is whether the feature is on, not whether the front hand grips the gun at that shot:
+    // RDRVR keeps that inside its own core, out of reach of natives.
+    bool two_handed = false;
+    std::string two_handed_source = "default";
+
     // [Intensity] multipliers, 0 turns the effect off
     float recoil = 1.0f;
     float impact = 1.0f;
