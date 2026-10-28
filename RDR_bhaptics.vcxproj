@@ -121,6 +121,10 @@ if /i not "$(DeployToGame)"=="true" echo deploy_game: skipped (DeployToGame=$(De
     <ClInclude Include="src\haptics.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\log.h" />
+    <ClInclude Include="src\version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\RDR_bhaptics.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config\RDR_bhaptics.ini" />

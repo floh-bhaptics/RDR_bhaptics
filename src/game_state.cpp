@@ -102,10 +102,15 @@ int arm() { return g_cfg.left_handed ? 1 : 0; }
 
 float clampf(float v, float lo, float hi) { return v < lo ? lo : (v > hi ? hi : v); }
 
-// The attacker's direction around the player, 0 = in front, degrees as bHaptics' angleX takes it.
-// The world is y-up (RDRVR's research: "y is up (the game's world)"), so the ground plane is x / z.
-// TODO(calibrate in game): the heading's zero and sense. [Impact] AngleOffset / AngleInvert cover it once known;
-// with DebugLog=1 each hit logs the raw numbers.
+// The attacker's direction around the player, 0 = in front, degrees counter-clockwise seen from above (90 = left,
+// 270 = right), as bHaptics' angleX takes it. The attacker's position, not a shot direction.
+//
+// The game's world is y-up, the ground plane x / z. Its heading convention (RDRVR's measurement, gameplay/main.cpp:
+// "heading h faces (-sin h, -cos h) in x/z, positive turning left"): heading 0 faces -z, not +z, and grows
+// counter-clockwise. With `world` measured from +z toward +x (atan2(dx, dz)), the player faces world angle h + 180,
+// and since both angles grow counter-clockwise, the counter-clockwise angle to the attacker is world - (h + 180).
+// (1.0.0: was world - h, 180 degrees off: front and back swapped.)
+// [Impact] AngleOffset / AngleInvert are still there for fine calibration.
 bool hit_angle(Actor attacker, float* out_deg) {
     if (attacker == 0 || attacker == g_player || !ENTITY::IS_ACTOR_VALID(attacker)) return false;
     const Vector3 me = ACTOR::GET_POSITION(g_player);
@@ -115,7 +120,7 @@ bool hit_angle(Actor attacker, float* out_deg) {
     if (dist < 0.05f || dist > 300.0f) return false;  // on top of us, or a stale attacker from long ago
     const float world = std::atan2(dx, dz) * Math<float>::RadToDeg;
     const float heading = ACTOR::GET_HEADING(g_player);
-    float rel = world - heading;
+    float rel = world - (heading + 180.0f);
     if (g_cfg.hit_angle_invert) rel = -rel;
     rel += g_cfg.hit_angle_offset;
     rel = std::fmod(std::fmod(rel, 360.0f) + 360.0f, 360.0f);

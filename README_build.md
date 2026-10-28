@@ -23,7 +23,7 @@ set. `registryAndInit` gets an empty string as its third parameter (no default p
 | `Reload_R/_L` | the game's reload starts |
 | `Impact` | a hit, rotated toward the attacker (angleX) |
 | `ImpactNoDir` | a hit without a known attacker (falls, explosions) |
-| `Heartbeat` | low health, faster as it drops |
+| `Heartbeat` | low health, faster as it drops; also once at full strength when the bHaptics Player connects |
 | `Heal` | a large health rise at once (medicine) |
 | `Death` | the player dies |
 | `DeadeyeStart`, `DeadeyePulse`, `DeadeyeEnd` | Dead Eye |
@@ -56,6 +56,11 @@ The post-build event:
   property is `true` (the default) and `RdrGameDir` contains `RDR.exe`, so elsewhere it is skipped. Set either one as
   an environment variable or with `msbuild /p:DeployToGame=false` to change it. A failed copy (the game still
   running) is a warning, not a failed build.
+
+## Version
+
+`src/version.h` (1.0.0): the log's first line and the `.red`'s file properties (`src/RDR_bhaptics.rc`). RedHook
+reads no version from plugins.
 
 ## Code
 

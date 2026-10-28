@@ -17,6 +17,7 @@
 #include "game_state.h"
 #include "haptics.h"
 #include "log.h"
+#include "version.h"
 
 namespace {
 
@@ -42,8 +43,8 @@ void script_main() {
     rdrbh::log::open(plugin_dir + L"\\RDR_bhaptics.log");
     const rdrbh::Config cfg = rdrbh::load_config(plugin_dir, game_dir);
     rdrbh::log::set_debug(cfg.debug_log);
-    rdrbh::log::info("RDR_bhaptics starting (RedHook %d.%d), %s-handed (%s), long guns %s (%s)", RH_GetMajorVersion(),
-                     RH_GetMinorVersion(), cfg.left_handed ? "left" : "right", cfg.hand_source.c_str(),
+    rdrbh::log::info("RDR_bhaptics " RDRBH_VERSION_STRING " starting (RedHook %d.%d), %s-handed (%s), long guns %s (%s)",
+                     RH_GetMajorVersion(), RH_GetMinorVersion(), cfg.left_handed ? "left" : "right", cfg.hand_source.c_str(),
                      cfg.two_handed ? "two-handed" : "one-handed", cfg.two_handed_source.c_str());
 
     if (!cfg.enabled) {
@@ -63,7 +64,12 @@ void script_main() {
         if (now >= next_conn_check) {
             next_conn_check = now + 2000;
             const bool c = rdrbh::haptics::connected();
-            if (c != was_connected) rdrbh::log::info(c ? "bHaptics Player connected" : "bHaptics Player not connected");
+            if (c != was_connected) {
+                rdrbh::log::info(c ? "bHaptics Player connected" : "bHaptics Player not connected");
+                // one heartbeat: the mod is loaded and talking to the Player (again after a Player restart). Full
+                // strength, whatever [Intensity] Heartbeat says, so it always confirms.
+                if (c) rdrbh::haptics::play("Heartbeat", 1.0f);
+            }
             was_connected = c;
         }
         rdrbh::game::tick(now);

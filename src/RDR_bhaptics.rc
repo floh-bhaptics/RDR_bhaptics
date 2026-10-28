@@ -1,0 +1,31 @@
+// Version info: shown in the .red's Properties > Details in Explorer.
+#include <winres.h>
+#include "version.h"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION RDRBH_VERSION_MAJOR, RDRBH_VERSION_MINOR, RDRBH_VERSION_PATCH, 0
+ PRODUCTVERSION RDRBH_VERSION_MAJOR, RDRBH_VERSION_MINOR, RDRBH_VERSION_PATCH, 0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_DLL
+ FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "floh-bhaptics"
+            VALUE "FileDescription", "bHaptics support for Red Dead Redemption (RedHook plugin)"
+            VALUE "FileVersion", RDRBH_VERSION_STRING
+            VALUE "InternalName", "RDR_bhaptics"
+            VALUE "OriginalFilename", "RDR_bhaptics.red"
+            VALUE "ProductName", "RDR_bhaptics"
+            VALUE "ProductVersion", RDRBH_VERSION_STRING
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

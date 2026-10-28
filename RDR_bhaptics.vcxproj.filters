@@ -24,6 +24,10 @@
     <ClInclude Include="src\haptics.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="src\config.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="src\log.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="src\version.h"><Filter>Header Files</Filter></ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\RDR_bhaptics.rc"><Filter>Source Files</Filter></ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="config\RDR_bhaptics.ini"><Filter>Package</Filter></None>
