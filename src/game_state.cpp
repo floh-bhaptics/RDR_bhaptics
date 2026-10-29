@@ -3,6 +3,7 @@
 #include "rh.h"
 
 #include <cmath>
+#include <cstring>
 #include <random>
 
 #include "haptics.h"
@@ -45,8 +46,10 @@ constexpr const char* kHorseGallop = "HorseGallop";
 constexpr const char* kOnFire = "OnFire";
 constexpr const char* kWaterEnter = "WaterEnter";
 // 1.1.0
-constexpr const char* kDraw[2] = {"Draw_R", "Draw_L"};        // a weapon drawn
-constexpr const char* kHolster[2] = {"Holster_R", "Holster_L"};  // put away
+constexpr const char* kDraw[2] = {"Draw_R", "Draw_L"};        // a sidearm (pistol, revolver, knife, thrown) drawn
+constexpr const char* kHolster[2] = {"Holster_R", "Holster_L"};  // put away at the hip
+constexpr const char* kDrawBack[2] = {"Draw_Back_R", "Draw_Back_L"};        // 1.1.1: a long gun or the bow, from the back
+constexpr const char* kHolsterBack[2] = {"Holster_Back_R", "Holster_Back_L"};  // put away on the back
 constexpr const char* kJump = "Player_Jump";
 constexpr const char* kLand = "Player_Land";
 constexpr const char* kMount = "HorseMount";
@@ -158,6 +161,12 @@ float rand_float(float lo, float hi) { return std::uniform_real_distribution<flo
 
 int arm() { return g_cfg.left_handed ? 1 : 0; }
 
+float as_float(int bits) {
+    float f;
+    std::memcpy(&f, &bits, sizeof f);
+    return f;
+}
+
 float clampf(float v, float lo, float hi) { return v < lo ? lo : (v > hi ? hi : v); }
 
 // The attacker's direction around the player, 0 = in front, degrees counter-clockwise seen from above (90 = left,
@@ -238,9 +247,13 @@ void health(uint64_t now) {
                 } else {
                     haptics::play(ev::kImpactNoDir, k);  // falls, fire, explosions without a known source
                 }
-                log::debug("hit: %.1f -> %.1f of %.1f (last damage %d), weapon %d, fresh %d (hit time %d -> %d), %s, "
-                           "intensity %.2f", g_health, hp, max_hp, HEALTH::GET_LAST_DAMAGE(g_player), static_cast<int>(hw),
-                           fresh, g_hit_time, hit_time, event ? event : (directional ? "Impact" : "ImpactNoDir"), k);
+                // GET_LAST_DAMAGE and GET_LAST_HIT_TIME return floats under the SDK's int declarations (1.1.0's log:
+                // 1088946176 = 7.25f damage, hit times -1.0f before any hit, then game seconds); the change test on
+                // the raw bits is unaffected
+                log::debug("hit: %.1f -> %.1f of %.1f (last damage %.2f), weapon %d, fresh %d (hit time %.2f -> %.2f), %s, "
+                           "intensity %.2f", g_health, hp, max_hp, as_float(HEALTH::GET_LAST_DAMAGE(g_player)),
+                           static_cast<int>(hw), fresh, as_float(g_hit_time), as_float(hit_time),
+                           event ? event : (directional ? "Impact" : "ImpactNoDir"), k);
             } else if (ko_drop > 0 && max_ko > 0) {
                 // fistfights: the brawl's punches take KO points, not health
                 const float k = clampf(0.4f + 3.0f * static_cast<float>(ko_drop) / max_ko, 0.4f, 1.0f) * g_cfg.impact;
@@ -284,8 +297,13 @@ void weapon(uint64_t now) {
 
     // Drawing and putting away, on the gun arm. Not on a mounted gun (getting on one "draws" it).
     if (g_baseline && !on_turret && !g_on_turret && drawn != g_drawn) {
-        haptics::play(drawn ? ev::kDraw[a] : ev::kHolster[a], g_cfg.movement);
-        log::debug("%s (weapon %d)", drawn ? "draw" : "holster", static_cast<int>(drawn ? w : g_weapon));
+        // the weapon being drawn is the one in hand now; the one put away was in hand last tick
+        const WeaponModel moved = drawn ? w : g_weapon;
+        const WeaponClass mc = classify(moved);
+        const bool back = mc == WeaponClass::Rifle || mc == WeaponClass::Shotgun || mc == WeaponClass::Bow;
+        haptics::play(back ? (drawn ? ev::kDrawBack[a] : ev::kHolsterBack[a]) : (drawn ? ev::kDraw[a] : ev::kHolster[a]),
+                      g_cfg.movement);
+        log::debug("%s%s (weapon %d)", drawn ? "draw" : "holster", back ? " back" : "", static_cast<int>(moved));
     }
 
     if (g_baseline && w == g_weapon && !on_turret) {

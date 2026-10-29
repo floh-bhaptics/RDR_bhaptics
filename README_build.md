@@ -30,7 +30,8 @@ set. `registryAndInit` gets an empty string as its third parameter (no default p
 | `DeadeyeStart`, `DeadeyePulse`, `DeadeyeEnd` | Dead Eye |
 | `HorseTrot`, `HorseGallop` | riding, in step with the horse's speed |
 | `OnFire`, `WaterEnter` | burning, wading in |
-| `Draw_R/_L`, `Holster_R/_L` | a weapon drawn / put away (not on mounted guns) |
+| `Draw_R/_L`, `Holster_R/_L` | a sidearm (pistol, revolver, knife, thrown weapon) drawn / put away at the hip (not on mounted guns) |
+| `Draw_Back_R/_L`, `Holster_Back_R/_L` | the same for long guns (rifles, repeaters, shotguns incl. the sawed-off) and the bow, from / to the back |
 | `Player_Jump`, `Player_Land` | jumping; landing after at least `[Movement] MinAirMs` in the air, stronger the longer the fall (on foot only) |
 | `HorseMount`, `HorseDismount` | getting on / off a horse |
 | `Whistle` | whistling for the horse |
@@ -65,7 +66,7 @@ The post-build event:
 
 ## Version
 
-`src/version.h` (1.1.0): the log's first line and the `.red`'s file properties (`src/RDR_bhaptics.rc`). RedHook
+`src/version.h` (1.1.1): the log's first line and the `.red`'s file properties (`src/RDR_bhaptics.rc`). RedHook
 reads no version from plugins.
 
 ## Code
