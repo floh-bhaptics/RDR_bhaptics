@@ -85,16 +85,26 @@ Config load_config(const std::wstring& dir, const std::wstring& game_dir) {
     c.deadeye = read_float(ini, L"Intensity", L"Deadeye", c.deadeye);
     c.horse = read_float(ini, L"Intensity", L"Horse", c.horse);
     c.environment = read_float(ini, L"Intensity", L"Environment", c.environment);
+    c.movement = read_float(ini, L"Intensity", L"Movement", c.movement);
+    c.rain = read_float(ini, L"Intensity", L"Rain", c.rain);
 
     c.hit_angle_offset = read_float(ini, L"Impact", L"AngleOffset", c.hit_angle_offset);
     c.hit_angle_invert = read_bool(ini, L"Impact", L"AngleInvert", c.hit_angle_invert);
     c.min_damage = read_float(ini, L"Impact", L"MinDamage", c.min_damage);
+    c.check_hit_time = read_bool(ini, L"Impact", L"CheckHitTime", c.check_hit_time);
 
     c.low_health_ratio = read_float(ini, L"Health", L"LowHealthRatio", c.low_health_ratio);
     c.heal_ratio = read_float(ini, L"Health", L"HealRatio", c.heal_ratio);
 
     c.trot_speed = read_float(ini, L"Horse", L"TrotSpeed", c.trot_speed);
     c.gallop_speed = read_float(ini, L"Horse", L"GallopSpeed", c.gallop_speed);
+
+    c.min_air_ms = static_cast<uint64_t>(read_float(ini, L"Movement", L"MinAirMs", static_cast<float>(c.min_air_ms)));
+    c.rain_min_ms = static_cast<int>(read_float(ini, L"Rain", L"MinPauseMs", static_cast<float>(c.rain_min_ms)));
+    c.rain_max_ms = static_cast<int>(read_float(ini, L"Rain", L"MaxPauseMs", static_cast<float>(c.rain_max_ms)));
+    if (c.rain_min_ms < 20) c.rain_min_ms = 20;
+    if (c.rain_max_ms < c.rain_min_ms) c.rain_max_ms = c.rain_min_ms;
+    c.rain_outdoors_only = read_bool(ini, L"Rain", L"OutdoorsOnly", c.rain_outdoors_only);
 
     // the hand: our ini wins, then RDRVR's user ini (its menu), then its shipped ini
     std::wstring hand = read_str(ini, L"Hands", L"Hand", L"Auto");

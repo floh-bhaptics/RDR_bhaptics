@@ -21,14 +21,20 @@ set. `registryAndInit` gets an empty string as its third parameter (no default p
 | `RecoilTurret` | firing a Gatling or Browning (re-played every 110 ms while firing) |
 | `RecoilCannon` | firing a cannon (at most every 1.5 s) |
 | `Reload_R/_L` | the game's reload starts |
-| `Impact` | a hit, rotated toward the attacker (angleX) |
-| `ImpactNoDir` | a hit without a known attacker (falls, explosions) |
+| `Hit_Bullet`, `Hit_Shotgun`, `Hit_Arrow`, `Hit_Knife`, `Hit_Fist`, `Hit_Explosion` | a fresh hit by that kind of weapon (`GET_LAST_HIT_WEAPON`), rotated toward the attacker (angleX). Fists have no weapon id: an unknown weapon from within 3 m counts as a fist |
+| `Impact` | a hit by an unknown weapon, and fistfight punches (KO points), rotated toward the attacker |
+| `ImpactNoDir` | a hit without a known attacker or not from a fresh attack (falls, fire) |
 | `Heartbeat` | low health, faster as it drops; also once at full strength when the bHaptics Player connects |
 | `Heal` | a large health rise at once (medicine) |
 | `Death` | the player dies |
 | `DeadeyeStart`, `DeadeyePulse`, `DeadeyeEnd` | Dead Eye |
 | `HorseTrot`, `HorseGallop` | riding, in step with the horse's speed |
 | `OnFire`, `WaterEnter` | burning, wading in |
+| `Draw_R/_L`, `Holster_R/_L` | a weapon drawn / put away (not on mounted guns) |
+| `Player_Jump`, `Player_Land` | jumping; landing after at least `[Movement] MinAirMs` in the air, stronger the longer the fall (on foot only) |
+| `HorseMount`, `HorseDismount` | getting on / off a horse |
+| `Whistle` | whistling for the horse |
+| `Rain_Splash_1` .. `Rain_Splash_4` | rain or storm outdoors: a random one, at a random angle (0-360), every 100-500 ms (`[Rain]`); stronger in a storm |
 
 The names are CamelCase for readability; the plugin lowercases them before calling the SDK, so create them in
 the portal in lowercase (`RecoilPistol_R` → `recoilpistol_r`).
@@ -59,7 +65,7 @@ The post-build event:
 
 ## Version
 
-`src/version.h` (1.0.0): the log's first line and the `.red`'s file properties (`src/RDR_bhaptics.rc`). RedHook
+`src/version.h` (1.1.0): the log's first line and the `.red`'s file properties (`src/RDR_bhaptics.rc`). RedHook
 reads no version from plugins.
 
 ## Code
