@@ -19,7 +19,7 @@ namespace rdrbh::haptics {
 namespace {
 
 // The calls we need take their types from the SDK's own declarations, so a signature change in a new header fails to
-// compile here. Two exports are newer than some SDK2 releases (bHapticsGetVersion, bHapticsShutdown: 2.7 / 2.8), so
+// compile here. Two exports are newer than some SDK2 releases (bHapticsShutdown: 2.7.1, bHapticsGetVersion: 2.8.2), so
 // they get types of their own and are optional at runtime.
 using GetVersionFn = const char*(__cdecl*)(void);
 using ShutdownFn = void(__cdecl*)(void);
@@ -128,9 +128,11 @@ bool start(const std::wstring& dll_path, const std::string& app_id, const std::s
 #ifdef BHAPTICS_VERSION_MAJOR
     const char* header = BHAPTICS_STR(BHAPTICS_VERSION_MAJOR) "." BHAPTICS_STR(BHAPTICS_VERSION_MINOR) "." BHAPTICS_STR(BHAPTICS_VERSION_PATCH);
 #else
-    const char* header = "older than 2.7";
+    const char* header = "before 2.7.1";
 #endif
-    log::info("bHaptics SDK: DLL %s, header %s", g_api.get_version ? g_api.get_version() : "older than 2.7", header);
+    // bHapticsGetVersion exists only from SDK 2.8.2 on: the 2.7.1 release DLL (the current tagged release) has none
+    log::info("bHaptics SDK: DLL %s, header %s", g_api.get_version ? g_api.get_version() : "2.7.1 or older (no bHapticsGetVersion)",
+              header);
     if (!g_api.shutdown) log::info("bhaptics_library.dll has no bHapticsShutdown (older SDK): fine while the game exits with it");
 
     // returns at once; connects (and reconnects when the player starts later) in the background
